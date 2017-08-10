@@ -10,13 +10,9 @@
 	},
 	"extends": "auz",
 	"globals": {
-		"alert": true,
-		"const": true,
-		"mat3": true,
-		"mat4": true,
-		"vec2": true,
-		"vec3": true,
-		"XMLHttpRequest": true
+		"describe": true,
+		"it": true,
+		"beforeAll": true
 	},
 	"parser": "babel-eslint",
 	"parserOptions": {
