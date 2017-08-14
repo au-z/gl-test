@@ -22,11 +22,11 @@ export default (function () {
       }
       gl.viewportWidth = canvas.width
       gl.viewportHeight = canvas.height
-      clearColor = _clearColor
+      clearColor = _clearColor || [0.1, 0.1, 0.1, 1.0]
+      console.log(clearColor)
     } catch (e) {
       if (!gl) window.alert('Could not init WebGL. Sorry. :(')
     }
-
     return new Promise(function(resolve, reject) {
       initShaders(vsUrl, fsUrl)
         .then(function(program) {
@@ -111,22 +111,46 @@ export default (function () {
 
   function loadShaderAsync(url, type) {
     return new Promise(function(resolve, reject) {
-      const http = new XMLHttpRequest()
-      http.responseType = 'text'
-      http.open('GET', url)
-      http.onload = function() {
-        if(http.status === 200) {
-          const shader = compileShader(http.response, type)
-          shader.type = type
-          resolve(shader)
-        }else{
-          reject(Error(http.statusText))
-        }
+      let response
+      switch(type) {
+        case('vertex'):
+          response = `attribute vec3 aVertexPosition;
+          uniform mat4 uMVMatrix;
+          uniform mat4 uPMatrix;
+          void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+          }`
+          break
+        case('fragment'):
+          response = `precision mediump float;
+          void main(void) {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }`
+          break
+        default:
+          reject('shader type not recognized')
+          break
       }
-      http.onerror = function() {
-        reject(Error('Network error.'))
-      }
-      http.send()
+      const shader = compileShader(response, type)
+      shader.type = type
+      resolve(shader)
+      // const http = new XMLHttpRequest()
+      // http.responseType = 'text'
+      // http.open('GET', url)
+      // http.onload = function() {
+      //   console.log(http.response)
+      //   if(http.status === 200) {
+      //     const shader = compileShader(http.response, type)
+      //     shader.type = type
+      //     resolve(shader)
+      //   }else{
+      //     reject(Error(http.statusText))
+      //   }
+      // }
+      // http.onerror = function() {
+      //   reject(Error('Network error.'))
+      // }
+      // http.send()
     })
   }
 
@@ -156,6 +180,7 @@ export default (function () {
 
   function resize() {
     const realToCSSPixels = window.devicePixelRatio || 1
+    console.log(gl.canvas)
     const displayWidth = Math.floor(gl.canvas.clientWidth * realToCSSPixels)
     const displayHeight = Math.floor(gl.canvas.clientHeight * realToCSSPixels)
     if (gl.canvas.width !== displayWidth || gl.canvas.height !== displayHeight) {

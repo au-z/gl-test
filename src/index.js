@@ -17,6 +17,7 @@ export function init(canvasId, _gl = null) {
     .catch((e) => console.error(e))
 
   function render(glTools) {
+    console.log('allo')
     gl = glTools.gl
     sp = glTools.shaderProgram
     setupShaders()
@@ -84,7 +85,7 @@ export function init(canvasId, _gl = null) {
   }
 
   function tick(){
-    requestAnimationFrame(tick)
+    // requestAnimationFrame(tick)
     drawScene()
     // animate()
   }

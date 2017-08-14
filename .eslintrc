@@ -10,9 +10,12 @@
 	},
 	"extends": "auz",
 	"globals": {
+		"async": true,
+		"await": true,
+		"beforeAll": true,
 		"describe": true,
 		"it": true,
-		"beforeAll": true
+		"jest": true
 	},
 	"parser": "babel-eslint",
 	"parserOptions": {
