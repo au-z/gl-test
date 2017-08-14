@@ -29,6 +29,7 @@
 		"no-trailing-spaces": 1,
 		"require-jsdoc": 0,
 		"semi": ["error", "never"],
-		"space-before-function-paren": 0
+		"space-before-function-paren": 0,
+		"linebreak-style": 0
 	}
 }

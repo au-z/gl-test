@@ -4,20 +4,24 @@ import GL from './glTools'
 export function init(canvasId, _gl = null) {
   let gl
   let sp
+
+    // eslint-disable-next-line
+  let triangleVertexPositionBuffer
+  // eslint-disable-next-line
+  let squareVertexPositionBuffer
+
   let mvMatrix = glm.mat4.create()
   let pMatrix = glm.mat4.create()
   const canvas = document.getElementById(canvasId || 'gl')
-  if(_gl) {
-    console.log('injecting custom gl context!')
-  }
   gl = _gl || canvas.getContext('webgl')
-
-  GL.initGL(canvas, [0.1, 0.1, 0.1, 1.0], '/shaders/vs.glsl', '/shaders/fs.glsl', gl)
+  return new Promise((resolve, reject) => {
+    GL.initGL(canvas, [0.1, 0.1, 0.1, 1.0], '/shaders/vs.glsl', '/shaders/fs.glsl', gl)
     .then(render)
+    .then(resolve, reject)
     .catch((e) => console.error(e))
+  })
 
   function render(glTools) {
-    console.log('allo')
     gl = glTools.gl
     sp = glTools.shaderProgram
     setupShaders()
@@ -25,11 +29,6 @@ export function init(canvasId, _gl = null) {
     glm.mat4.translate(pMatrix, pMatrix, glm.vec3.create(1.0, 1.0, 1.0))
     tick()
   }
-
-  // eslint-disable-next-line
-  let triangleVertexPositionBuffer
-  // eslint-disable-next-line
-  let squareVertexPositionBuffer
 
   // from learningwebgl.com
   function initBuffers() {

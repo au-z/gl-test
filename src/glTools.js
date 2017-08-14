@@ -1,4 +1,5 @@
 let glm = require('../lib/glmatrix/gl-matrix.min')
+let http = require('./http')
 
 export default (function () {
   let clearColor
@@ -20,10 +21,9 @@ export default (function () {
       } else {
         gl = canvas.getContext('webgl')
       }
+      clearColor = _clearColor || [0.1, 0.1, 0.1, 1.0]
       gl.viewportWidth = canvas.width
       gl.viewportHeight = canvas.height
-      clearColor = _clearColor || [0.1, 0.1, 0.1, 1.0]
-      console.log(clearColor)
     } catch (e) {
       if (!gl) window.alert('Could not init WebGL. Sorry. :(')
     }
@@ -73,31 +73,19 @@ export default (function () {
 
   function initShaders(vsUrl, fsUrl) {
     return new Promise(function(resolve, reject) {
-      const loadVertShader = loadShaderAsync(vsUrl, 'vertex')
-      const loadFragShader = loadShaderAsync(fsUrl, 'fragment')
+      const loadVertShader = http.get(vsUrl, 'text')
+      const loadFragShader = http.get(fsUrl, 'text')
       Promise.all([loadVertShader, loadFragShader])
-      .then(createProgram)
-      .then(resolve, reject)
+        .then((shaders) => createProgram(...shaders))
+        .then(resolve, reject)
     })
   }
 
-  function createProgram(shaders) {
+  function createProgram(vertShader, fragShader) {
     return new Promise(function(resolve, reject) {
-      if(shaders.length !== 2) {
-        reject(Error(shaders.length + ' shader(s) loaded. glUtils supports only two shaders.'))
-      }
-      let vertShader
-      let fragShader
-      for(let i = 0; i < shaders.length; i++) {
-        if(shaders[i].type === 'vertex') {
-          vertShader = shaders[i]
-        } else if(shaders[i].type === 'fragment') {
-          fragShader = shaders[i]
-        }
-      }
       const program = gl.createProgram()
-      gl.attachShader(program, vertShader)
-      gl.attachShader(program, fragShader)
+      gl.attachShader(program, compileShader(vertShader, 'vertex'))
+      gl.attachShader(program, compileShader(fragShader, 'fragment'))
 
       gl.linkProgram(program)
 
@@ -106,51 +94,6 @@ export default (function () {
       }
       gl.useProgram(program)
       resolve(program)
-    })
-  }
-
-  function loadShaderAsync(url, type) {
-    return new Promise(function(resolve, reject) {
-      let response
-      switch(type) {
-        case('vertex'):
-          response = `attribute vec3 aVertexPosition;
-          uniform mat4 uMVMatrix;
-          uniform mat4 uPMatrix;
-          void main(void) {
-            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-          }`
-          break
-        case('fragment'):
-          response = `precision mediump float;
-          void main(void) {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-          }`
-          break
-        default:
-          reject('shader type not recognized')
-          break
-      }
-      const shader = compileShader(response, type)
-      shader.type = type
-      resolve(shader)
-      // const http = new XMLHttpRequest()
-      // http.responseType = 'text'
-      // http.open('GET', url)
-      // http.onload = function() {
-      //   console.log(http.response)
-      //   if(http.status === 200) {
-      //     const shader = compileShader(http.response, type)
-      //     shader.type = type
-      //     resolve(shader)
-      //   }else{
-      //     reject(Error(http.statusText))
-      //   }
-      // }
-      // http.onerror = function() {
-      //   reject(Error('Network error.'))
-      // }
-      // http.send()
     })
   }
 
@@ -180,7 +123,6 @@ export default (function () {
 
   function resize() {
     const realToCSSPixels = window.devicePixelRatio || 1
-    console.log(gl.canvas)
     const displayWidth = Math.floor(gl.canvas.clientWidth * realToCSSPixels)
     const displayHeight = Math.floor(gl.canvas.clientHeight * realToCSSPixels)
     if (gl.canvas.width !== displayWidth || gl.canvas.height !== displayHeight) {
