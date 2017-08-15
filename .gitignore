@@ -1,1 +1,3 @@
 node_modules
+test/**/*.head.png
+test/output/**/*.png

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "test": "jest",
+    "test": "node test/runner.js",
+    "test:update": "node test/runner.js -u",
     "test:watch": "jest --watch"
   },
   "author": "Austin Martin",
@@ -28,6 +29,7 @@
     "gl": "^4.0.4",
     "html-webpack-plugin": "^2.28.0",
     "jest": "^20.0.4",
+    "looks-same": "^3.2.1",
     "pngjs2": "^2.0.0",
     "webpack": "^3.5.2",
     "webpack-dev-server": "^2.4.5",
