@@ -1,6 +1,6 @@
 const app = require('../src/index')
-const glTest = require('./helpers/glTest')
 const http = require('../src/http')
+const jestGl = require('jest-gl')()
 
 const width = 500
 const height = 300
@@ -11,10 +11,10 @@ let canvas
 describe('gl visual tests', () => {
   beforeAll(() => {
     http.get = jest.fn((url, responseType) =>
-      glTest.fromFile(url, (originalUrl) =>
+      jestGl.fromFile(url, (originalUrl) =>
         (originalUrl.indexOf('vs') > -1) ? './app/shaders/vs.glsl' : './app/shaders/fs.glsl'))
 
-    canvas = glTest.mockCanvas(gl, {
+    canvas = jestGl.mockCanvas(gl, {
       width: {value: 300},
       height: {value: 150},
       clientWidth: {value: width},
@@ -23,7 +23,7 @@ describe('gl visual tests', () => {
   })
   it('initializes with a square and triangle', async () => {
     await app.init(canvas, gl)
-    let parity = await glTest.imageParity(gl, __dirname, 'init', true, true)
+    let parity = await jestGl.imageParity(gl, __dirname, 'init', true, true)
     expect(parity).toBe(true)
   })
 })
